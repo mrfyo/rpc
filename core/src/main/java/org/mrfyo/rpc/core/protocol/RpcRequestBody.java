@@ -1,6 +1,7 @@
 package org.mrfyo.rpc.core.protocol;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * RPC 请求体
@@ -23,7 +24,7 @@ public class RpcRequestBody implements Serializable {
     /**
      * 参数类型列表
      */
-    private Class<?>[] paramTypes;
+    private List<String> paramTypes;
 
 
     public String getInterfaceName() {
@@ -50,11 +51,11 @@ public class RpcRequestBody implements Serializable {
         this.params = params;
     }
 
-    public Class<?>[] getParamTypes() {
+    public List<String> getParamTypes() {
         return paramTypes;
     }
 
-    public void setParamTypes(Class<?>[] paramTypes) {
+    public void setParamTypes(List<String> paramTypes) {
         this.paramTypes = paramTypes;
     }
 }

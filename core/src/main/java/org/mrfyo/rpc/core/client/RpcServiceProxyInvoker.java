@@ -7,6 +7,8 @@ import org.mrfyo.rpc.core.protocol.RpcResponseBody;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,11 +47,12 @@ public class RpcServiceProxyInvoker implements InvocationHandler {
         }
 
         // 1. 编码
+        List<String> paramTypes = Arrays.stream(method.getParameterTypes()).map(Class::getName).toList();
         RpcRequestBody resBody = new RpcRequestBody();
         resBody.setInterfaceName(serviceType.getName());
         resBody.setMethodName(method.getName());
         resBody.setParams(args);
-        resBody.setParamTypes(method.getParameterTypes());
+        resBody.setParamTypes(paramTypes);
 
         RpcRequest request = new RpcRequest();
         request.setHeader("version=1");

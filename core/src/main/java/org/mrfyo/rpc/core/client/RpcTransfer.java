@@ -1,10 +1,18 @@
 package org.mrfyo.rpc.core.client;
 
+import com.alibaba.fastjson.JSON;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.util.Pool;
 import org.mrfyo.rpc.core.codec.RpcRequest;
 import org.mrfyo.rpc.core.codec.RpcResponse;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -28,10 +36,14 @@ public class RpcTransfer implements Closeable {
      */
     private final int cap;
 
+    private final int encodeType;
+
     /**
      * Socket 阻塞队列
      */
     private final BlockingQueue<Socket> socketQueue;
+
+    private final Pool<Kryo> kryoPool;
 
     /**
      * Socket 当前个数
@@ -40,13 +52,23 @@ public class RpcTransfer implements Closeable {
 
     private boolean closed;
 
-    public RpcTransfer(String host, int port, int cap) {
+    public RpcTransfer(String host, int port, int encodeType, int cap) {
         assert cap > 0;
         this.host = host;
         this.port = port;
+        this.encodeType = encodeType;
         this.cap = cap;
         this.socketQueue = new LinkedBlockingQueue<>(cap + 1);
+        this.kryoPool = new Pool<>(true, false, cap) {
+            @Override
+            protected Kryo create() {
+                Kryo kryo = new Kryo();
+                kryo.setRegistrationRequired(false);
+                return kryo;
+            }
+        };
         new MonitorThread().start();
+
     }
 
     // Socket Manage
@@ -122,20 +144,67 @@ public class RpcTransfer implements Closeable {
     }
 
     private RpcResponse doSend(Socket socket, RpcRequest request) throws IOException {
-        socket.getOutputStream().write(1);
-        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-        oos.writeObject(request);
-        oos.flush();
-        if (socket.getInputStream().read() == -1) {
+        socket.getOutputStream().write(encodeType);
+        switch (encodeType) {
+            case 1 -> {
+                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                oos.writeObject(request);
+                oos.flush();
+            }
+            case 2 -> {
+                Kryo kryo = kryoPool.obtain();
+                try {
+                    Output output = new Output(socket.getOutputStream());
+                    kryo.writeClassAndObject(output, request);
+                    output.flush();
+                } finally {
+                    kryoPool.free(kryo);
+                }
+            }
+            case 3 -> {
+                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                byte[] b = JSON.toJSONBytes(request);
+                dos.writeInt(b.length);
+                dos.write(b);
+                dos.flush();
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + encodeType);
+        }
+
+        int decodeType = socket.getInputStream().read();
+        if (decodeType == -1) {
             throw new IOException("server closed.");
         }
-        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
         try {
-            return (RpcResponse) ois.readObject();
+            Object resp;
+            switch (decodeType) {
+                case 1 -> {
+                    resp = new ObjectInputStream(socket.getInputStream()).readObject();
+                }
+                case 2 -> {
+                    Kryo kryo = kryoPool.obtain();
+                    try {
+                        resp = kryo.readClassAndObject(new Input(socket.getInputStream()));
+                    } finally {
+                        kryoPool.free(kryo);
+                    }
+                }
+                case 3 -> {
+                    DataInputStream dos = new DataInputStream(socket.getInputStream());
+                    int length = dos.readInt();
+                    byte[] b = new byte[length];
+                    if (dos.read(b) != length) {
+                        System.err.println("codec protocol of client mismatches server");
+                    }
+                    resp = JSON.parseObject(b, RpcResponse.class);
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + decodeType);
+            }
+            return (RpcResponse) resp;
         } catch (ClassNotFoundException | ClassCastException e) {
             System.err.println("the codec protocol of client mismatches server.");
-            return null;
         }
+        return null;
     }
 
     @Override
