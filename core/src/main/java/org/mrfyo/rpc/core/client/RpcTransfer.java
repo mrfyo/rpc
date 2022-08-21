@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * RPC 传输对象
@@ -37,12 +38,15 @@ public class RpcTransfer implements Closeable {
      */
     private int size;
 
+    private boolean closed;
+
     public RpcTransfer(String host, int port, int cap) {
         assert cap > 0;
         this.host = host;
         this.port = port;
         this.cap = cap;
         this.socketQueue = new LinkedBlockingQueue<>(cap + 1);
+        new MonitorThread().start();
     }
 
     // Socket Manage
@@ -136,8 +140,43 @@ public class RpcTransfer implements Closeable {
 
     @Override
     public void close() {
+        this.closed = true;
         while (!socketQueue.isEmpty()) {
             closeSocket(socketQueue.poll());
+        }
+    }
+
+    private class MonitorThread extends Thread {
+
+        private static final int MAX_TOUCH_COUNT = 5;
+
+        private int count;
+
+        private int keepSize = 0;
+
+        @Override
+        public void run() {
+            while (!closed) {
+                if (size != keepSize) {
+                    keepSize = size;
+                    count = 0;
+                } else {
+                    count++;
+                }
+                if (count >= MAX_TOUCH_COUNT) {
+                    count = 0;
+                    Socket socket = socketQueue.poll();
+                    if (socket != null) {
+                        closeSocket(socket);
+                    }
+                    keepSize = size;
+                }
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
         }
     }
 }

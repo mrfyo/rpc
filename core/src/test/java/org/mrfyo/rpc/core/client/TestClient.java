@@ -18,7 +18,7 @@ public class TestClient {
                 System.out.println(helloService.hello("Jack"));
             });
         }
-        ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.SECONDS);
-        client.close();
+//        ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.SECONDS);
+//        client.close();
     }
 }
