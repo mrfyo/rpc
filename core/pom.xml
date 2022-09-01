@@ -29,6 +29,13 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.83</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+            <version>4.1.77.Final</version>
+        </dependency>
+
     </dependencies>
 
 </project>

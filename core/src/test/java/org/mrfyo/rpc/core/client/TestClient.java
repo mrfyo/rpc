@@ -11,6 +11,7 @@ public class TestClient {
         RpcClient client = new RpcClient(transfer);
         HelloService helloService = client.getService(HelloService.class);
         System.out.println(helloService.hello("Jack"));
+        client.close();
 //        for (int i = 0; i < 10; i++) {
 //            ForkJoinPool.commonPool().execute(() -> {
 //                System.out.println(helloService.hello("Jack"));
