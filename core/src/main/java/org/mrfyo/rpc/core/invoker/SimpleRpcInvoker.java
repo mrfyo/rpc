@@ -19,6 +19,7 @@ public class SimpleRpcInvoker implements RpcInvoker {
         Object result = execute(reqBody);
         RpcResponseBody respBody = new RpcResponseBody();
         respBody.setReturnObject(result);
+        respBody.setReturnType(result == null ? "" : result.getClass().getName());
         return respBody;
     }
 

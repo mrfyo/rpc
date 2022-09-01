@@ -1,15 +1,14 @@
-package org.mrfyo.rpc.core.codec;
+package org.mrfyo.rpc.core.protocol;
 
-import org.mrfyo.rpc.core.protocol.RpcResponseBody;
 
 import java.io.Serializable;
 
 /**
- * RPC 响应对象
+ * RPC 请求对象
  *
  * @author fengyong
  */
-public class RpcResponse implements Serializable {
+public class RpcRequest implements Serializable {
     /**
      * 请求头
      */
@@ -18,7 +17,7 @@ public class RpcResponse implements Serializable {
     /**
      * 请求体
      */
-    private RpcResponseBody body;
+    private RpcRequestBody body;
 
 
     public String getHeader() {
@@ -29,11 +28,11 @@ public class RpcResponse implements Serializable {
         this.header = header;
     }
 
-    public RpcResponseBody getBody() {
+    public RpcRequestBody getBody() {
         return body;
     }
 
-    public void setBody(RpcResponseBody body) {
+    public void setBody(RpcRequestBody body) {
         this.body = body;
     }
 }

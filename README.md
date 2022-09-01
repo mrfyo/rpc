@@ -3,10 +3,10 @@
 
 ## 特性
 
-- [x] socket 复用
-- [x] socket 动态申请
-- [x] socket 动态释放
+- [x] socket/channel 复用
+- [x] socket/channel 动态申请
+- [x] socket/channel 动态释放
 - [x] kryo 序列化协议
 - [x] JSON 序列化协议
 - [x] 动态选择序列化协议
-- [x] Netty Client/Server
+- [x] Netty NIO Client/Server

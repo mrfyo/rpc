@@ -1,6 +1,8 @@
 package org.mrfyo.rpc.core.client;
 
 import org.mrfyo.rpc.core.codec.*;
+import org.mrfyo.rpc.core.protocol.RpcRequest;
+import org.mrfyo.rpc.core.protocol.RpcResponse;
 
 import java.io.*;
 import java.net.Socket;

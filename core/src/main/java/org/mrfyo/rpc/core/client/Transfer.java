@@ -1,7 +1,7 @@
 package org.mrfyo.rpc.core.client;
 
-import org.mrfyo.rpc.core.codec.RpcRequest;
-import org.mrfyo.rpc.core.codec.RpcResponse;
+import org.mrfyo.rpc.core.protocol.RpcRequest;
+import org.mrfyo.rpc.core.protocol.RpcResponse;
 
 import java.io.Closeable;
 

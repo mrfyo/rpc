@@ -13,6 +13,8 @@ public class RpcResponseBody implements Serializable {
      */
     private Object returnObject;
 
+    private String returnType;
+
 
     public Object getReturnObject() {
         return returnObject;
@@ -20,5 +22,13 @@ public class RpcResponseBody implements Serializable {
 
     public void setReturnObject(Object returnObject) {
         this.returnObject = returnObject;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }
