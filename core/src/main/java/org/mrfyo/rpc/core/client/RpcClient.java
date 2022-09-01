@@ -11,9 +11,9 @@ public class RpcClient implements Closeable {
     /**
      * RPC 传输器
      */
-    private final RpcTransfer transfer;
+    private final Transfer transfer;
 
-    public RpcClient(RpcTransfer transfer) {
+    public RpcClient(Transfer transfer) {
         this.transfer = transfer;
     }
 

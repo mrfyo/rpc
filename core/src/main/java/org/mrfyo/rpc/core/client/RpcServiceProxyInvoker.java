@@ -20,7 +20,7 @@ public class RpcServiceProxyInvoker implements InvocationHandler {
     /**
      * RPC 传输器
      */
-    private final RpcTransfer transfer;
+    private final Transfer transfer;
 
     /**
      * 服务类型
@@ -32,7 +32,7 @@ public class RpcServiceProxyInvoker implements InvocationHandler {
      */
     private final Set<String> allowMethods;
 
-    public RpcServiceProxyInvoker(RpcTransfer transfer, Class<?> serviceType) {
+    public RpcServiceProxyInvoker(Transfer transfer, Class<?> serviceType) {
         this.transfer = transfer;
         this.serviceType = serviceType;
         this.allowMethods = Stream.of(serviceType.getDeclaredMethods())

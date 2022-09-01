@@ -9,3 +9,4 @@
 - [x] kryo 序列化协议
 - [x] JSON 序列化协议
 - [x] 动态选择序列化协议
+- [x] Netty Client/Server

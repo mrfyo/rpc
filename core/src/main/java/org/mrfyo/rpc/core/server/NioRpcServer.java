@@ -7,6 +7,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.mrfyo.rpc.core.codec.*;
@@ -18,7 +19,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NettyRpcServer implements RpcServer {
+public class NioRpcServer implements RpcServer {
 
     private final int port;
 
@@ -26,7 +27,7 @@ public class NettyRpcServer implements RpcServer {
 
     private final Map<String, Object> readonlyServicePool = Collections.unmodifiableMap(servicePool);
 
-    public NettyRpcServer(int port) {
+    public NioRpcServer(int port) {
         this.port = port;
     }
 
@@ -54,7 +55,7 @@ public class NettyRpcServer implements RpcServer {
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
                             ChannelPipeline p = channel.pipeline();
-    //                        p.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 4));
+                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 4));
                             p.addLast(new RpcInboundHandler(readonlyServicePool));
                         }
                     }).bind(port).sync();
@@ -71,7 +72,6 @@ public class NettyRpcServer implements RpcServer {
 
 
     private static final class RpcInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
-
         /**
          * 本地 服务池
          */

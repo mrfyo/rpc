@@ -1,7 +1,5 @@
 package org.mrfyo.rpc.core.client;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.util.Pool;
 import org.mrfyo.rpc.core.codec.*;
 
 import java.io.*;
@@ -14,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * RPC 传输对象
  */
-public class RpcTransfer implements Closeable {
+public class BioRpcTransfer implements Transfer {
     /**
      * 服务端主机地址
      */
@@ -44,7 +42,7 @@ public class RpcTransfer implements Closeable {
 
     private boolean closed;
 
-    public RpcTransfer(String host, int port, int encodeType, int cap) {
+    public BioRpcTransfer(String host, int port, int encodeType, int cap) {
         assert cap > 0;
         this.host = host;
         this.port = port;
@@ -109,6 +107,7 @@ public class RpcTransfer implements Closeable {
      * @param request RPC 请求对象
      * @return RPC 响应对象，如果调用失败，返回 null
      */
+    @Override
     public RpcResponse sendRequest(RpcRequest request) {
         boolean recycled = true;
         Socket socket = obtainSocket();
@@ -152,7 +151,7 @@ public class RpcTransfer implements Closeable {
         return null;
     }
 
-    private RpcCodec selectRcpCodec(int type) {
+    protected RpcCodec selectRcpCodec(int type) {
         return switch (type) {
             case 1 -> new JdkRpcCodec();
             case 2 -> new KryoRpcCodec(cap);
